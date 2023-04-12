@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trips-api-deployment
+  labels:
+    app: trips-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: trips-api
+  template:
+    metadata:
+      labels:
+        app: trips-api
+    spec:
+      containers:
+      - name: trips
+        image: registryvba6423.azurecr.io/tripinsights/trips:1.0
+        ports:
+        - containerPort: 80
+        env:
+        - name: SQL_USER
+          value: sqladminvBa6423
+        - name: SQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sqlsecret
+              key: password
+        - name: SQL_SERVER
+          value: sqlservervba6423.database.windows.net
+        - name: OPENAPI_DOCS_URI
+          value: http://localhost
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trips-api-service
+  labels:
+    app: trips-api
+spec:
+  selector:
+    app: trips-api
+  ports:
+  - port: 80
+    protocol: TCP
+  type: ClusterIP
